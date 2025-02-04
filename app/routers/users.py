@@ -6,7 +6,6 @@ from app.schemas.user import UserCreate, UserUpdate, UserResponse
 
 router = APIRouter()
 
-# Dependência para obter a sessão do banco de dados
 def get_db():
     db = SessionLocal()
     try:
@@ -14,7 +13,6 @@ def get_db():
     finally:
         db.close()
 
-# Create
 @router.post("/users/", response_model=UserResponse)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db_user = User(name=user.name, email=user.email)
@@ -23,13 +21,11 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     return db_user
 
-# Read (Listar todos os usuários)
 @router.get("/users/", response_model=list[UserResponse])
 def read_users(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     users = db.query(User).offset(skip).limit(limit).all()
     return users
 
-# Read (Obter um usuário por ID)
 @router.get("/users/{user_id}", response_model=UserResponse)
 def read_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
